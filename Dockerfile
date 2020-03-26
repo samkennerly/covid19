@@ -7,6 +7,7 @@ RUN apt-get -y update && apt-get -y install cmake gcc less tree
 
 # Install major stack components
 RUN pip install --upgrade pip && pip install \
+    matplotlib==3.2.1 \
     notebook==6.0.3 \
     pandas==1.0.3 \
     scipy==1.4.1
