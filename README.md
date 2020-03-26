@@ -70,3 +70,14 @@ If nodes become infections *before* symptoms become obvious, then "closing the w
 
 ### don't jump the gun
 
+
+## conclusions
+
+**WARNING:** The author is not a medical expert.
+These conclusions are neither proven nor peer-reviewed.
+
+- COVID-19 moves fast. Timing is critically important.
+- Infectious people should be quarantined **immediately**.
+- Self-quarantine *after* symptoms become obvious is good, but too slow.
+- People who become immune (if that's possible) should be un-quarantined.
+- When symptoms are subtle, accurate timing requires broad access to testing.
