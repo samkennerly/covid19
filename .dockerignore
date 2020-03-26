@@ -1,0 +1,4 @@
+# Build faster by ignoring build context
+**
+!/Dockerfile
+!/requirements.txt
