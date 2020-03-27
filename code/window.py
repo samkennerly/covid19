@@ -7,9 +7,10 @@ class ContagionWindow(Sequence):
     """
     UNDER CONSTRUCTION
     """
-    columns = 'cases deceased infectious recovered vaccinated'.split()
+    columns = 'cases deceased infectious recovered susceptible vaccinated'.split()
+    Counts = namedtuple('Counts', columns)
 
-    def __init__(self, values, **kwargs):
+    def __init__(self, values, delay=1, **kwargs):
         p, pop = dict(), kwargs.pop
         p["case"] = float(pop("case", 1))
         p["fatal"] = float(pop("fatal", 0))
@@ -50,12 +51,11 @@ class ContagionWindow(Sequence):
     def __len__(self):
         return len(self.values)
 
-    def __str__(self):
-        name = type(self).__name__
-        vstr = f"values: {self.values}"
-        pstr = "\n".join(f"{k}: {v}" for k, v in self.p.items())
+    def __repr__(self):
+        return f"{type(self).__name__}{tuple(self.values)}"
 
-        return f"{name}\n{vstr}\n{pstr}"
+    def __str__(self):
+        return "\n".join([repr(self), *( f"{k}: {v}" for k, v in self.p.items())])
 
     def convolved(values, window):
         return sum(w * x for w, x in zip(window, reversed(values)))
