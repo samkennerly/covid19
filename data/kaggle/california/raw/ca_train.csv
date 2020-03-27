@@ -60,3 +60,5 @@ Id,Province/State,Country/Region,Lat,Long,Date,ConfirmedCases,Fatalities
 59,California,US,36.1162,-119.6816,2020-03-20,1177.0,23.0
 60,California,US,36.1162,-119.6816,2020-03-21,1364.0,24.0
 61,California,US,36.1162,-119.6816,2020-03-22,1642.0,30.0
+62,California,US,36.1162,-119.6816,2020-03-23,2108.0,39.0
+63,California,US,36.1162,-119.6816,2020-03-24,2538.0,50.0
