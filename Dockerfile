@@ -1,18 +1,11 @@
-FROM python:3.8.2
+FROM python:3.6.10
 LABEL description="Python science laboratory"
 LABEL maintainer="samkennerly@gmail.com"
 
 # Install system packages
 RUN apt-get -y update && apt-get -y install cmake gcc less tree
 
-# Install major stack components
-RUN pip install --upgrade pip && pip install \
-    matplotlib==3.2.1 \
-    notebook==6.0.3 \
-    pandas==1.0.3 \
-    scipy==1.4.1
-
-# Install other Python packages
+# Install Python packages
 COPY requirements.txt /tmp
 RUN pip install --upgrade pip && pip install --requirement /tmp/requirements.txt
 
