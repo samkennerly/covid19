@@ -34,6 +34,15 @@ THE EXAMPLES HERE ARE NOT MEDICAL ADVICE. The author is a [quant], not an epidem
 
 {reduce |**w**| by decreasing contact frequency}
 
+<blockquote>
+We need to take the first step: returning. It's not even going to God. No! It's simply returning home.
+<br>
+<cite>
+<a href="https://www.youtube.com/watch?v=IlbXjPE55Fc">
+Pope Francis</a>
+</cite>
+</blockquote>
+
 ### close the window
 
 In this scenario, nodes quarantine themselves when they learn they are infected. To minimize new infections, *nodes must know when they become infectious.* If symptoms are not obvious before transmission is possible, then nodes may not be able to "close the window" quickly enough.
@@ -63,9 +72,17 @@ I was at an event where two people later tested positive for Coronavirus... Ther
 
 {no eradication without vaccination}
 
+<blockquote>
+There is no patent. Could you patent the sun?<br>
+<cite>
+<a href="https://en.wikiquote.org/wiki/Jonas_Salk">
+Jonas Salk</a>
+</cite>
+</blockquote>
+
 ### don't wait and see
 
-### don't jump the gun
+### don't jump the start
 
 
 ## conclusions
