@@ -2,6 +2,7 @@
 
 ## UNDER CONSTRUCTION
 
+
 ## abstract
 
 Contagion window models simulate [viral phenomena] with time-dependent [transmission] probabilities. The example shown here evolves according to a discrete [difference equation], not a differential equation.
@@ -17,14 +18,23 @@ THE EXAMPLES HERE ARE NOT MEDICAL ADVICE. The author is a [quant], not an epidem
 [difference equation]: https://en.wikipedia.org/wiki/Recurrence_relation
 [window]: https://en.wikipedia.org/wiki/Window_function
 [SIR model]: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology
+[social distancing]: https://en.wikipedia.org/wiki/Social_distancing
 [finite-response]: https://en.wikipedia.org/wiki/Finite_impulse_response
-
-
 [quant]: https://en.wikipedia.org/wiki/Quantitative_analysis_(finance)
 
-[social distancing]: https://en.wikipedia.org/wiki/Social_distancing
 
-## scenarios
+## contents
+
+
+## definitions
+
+See this [Jupyter] notebook for definitions and equations: [books/model.ipynb]
+
+[Jupyter]: https://jupyter.org/
+[books/model.ipynb]: books/model.ipynb
+
+
+## examples
 
 ### count the days
 
@@ -70,7 +80,7 @@ I was at an event where two people later tested positive for Coronavirus... Ther
 
 ### kill the virus
 
-{no eradication without vaccination}
+{herd immunity from widespread vaccination}
 
 <blockquote>
 There is no patent. Could you patent the sun?<br>
@@ -85,13 +95,4 @@ Jonas Salk</a>
 ### don't jump the start
 
 
-## conclusions
 
-**WARNING:** The author is not a medical expert.
-These conclusions are neither proven nor peer-reviewed.
-
-- COVID-19 moves fast. Timing is critically important.
-- Infectious people should be quarantined **immediately**.
-- Self-quarantine *after* symptoms become obvious is good, but too slow.
-- People who become immune (if that's possible) should be un-quarantined.
-- When symptoms are subtle, accurate timing requires broad access to testing.
