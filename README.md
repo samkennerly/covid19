@@ -5,22 +5,21 @@
 
 ## abstract
 
-Contagion window models simulate [viral phenomena] with time-dependent [transmission] probabilities. The example shown here evolves according to a discrete [difference equation], not a differential equation.
+Contagion window models simulate [viral phenomena] with time-dependent [transmission] probabilities. Discrete models use [recurrence relations], not differential equations, for computational simplicity.
 
-Each [window] is a sequence **w** such that each element <i>w<sub>i</sub></i> is the expected number of transmissions from one node after *i* days of infection. Like 𝛽 in a [SIR model], window elements represent averaged behavior of many individual nodes. Quarantine after *q* days of infection is modeled by setting <i>w<sub>i</sub></i> = 0 for all *i* &gt; *q*. Reduced transmission probability and/or [social distancing] is modeled by decreasing window magnitude |**w**|.
+A discrete [window] is a sequence **w** such that each element <i>w<sub>i</sub></i> is the expected number of transmissions from one node after *i* days of infection. Like 𝛽 in a [SIR model], window elements represent averaged behavior of many individual nodes. Quarantine after *q* days of infection can be modeled by setting <i>w<sub>i</sub></i> = 0 for all *i* &ge; *q*. [Social distancing] and/or reduced transmission probability can be modeled by decreasing window magnitude |**w**|.
 
 The examples shown here use [finite-response] windows with fixed duration. Each node is assumed to die or become permanently immune after 𝜏 days. The infection duration 𝜏 must be estimated experimentally.
 
-THE EXAMPLES HERE ARE NOT MEDICAL ADVICE. The author is a [quant], not an epidemiologist.
+THE EXAMPLES HERE ARE NOT MEDICAL ADVICE. The author is a physicist, not an epidemiologist.
 
 [viral phenomena]: https://en.wikipedia.org/wiki/Viral_phenomenon
 [transmission]: https://en.wikipedia.org/wiki/Transmission_(medicine)
-[difference equation]: https://en.wikipedia.org/wiki/Recurrence_relation
+[recurrence relations]: https://en.wikipedia.org/wiki/Recurrence_relation
 [window]: https://en.wikipedia.org/wiki/Window_function
 [SIR model]: https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology
-[social distancing]: https://en.wikipedia.org/wiki/Social_distancing
+[Social distancing]: https://en.wikipedia.org/wiki/Social_distancing
 [finite-response]: https://en.wikipedia.org/wiki/Finite_impulse_response
-[quant]: https://en.wikipedia.org/wiki/Quantitative_analysis_(finance)
 
 
 ## contents
