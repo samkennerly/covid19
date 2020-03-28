@@ -10,12 +10,11 @@ class ContagionWindow(Sequence):
     columns = 'cases deceased infectious recovered susceptible vaccinated'.split()
     Counts = namedtuple('Counts', columns)
 
-    def __init__(self, values, delay=1, **kwargs):
+    def __init__(self, values, **kwargs):
         p, pop = dict(), kwargs.pop
-        p["case"] = float(pop("case", 1))
+        p["confirm"] = float(pop("case", 1))
         p["fatal"] = float(pop("fatal", 0))
-        p["transmit"] = float(pop("transmit", 0.5))
-        p["vaccinated"] = float(pop("vaccinated", 0))
+        p["vax"] = float(pop("vax", 0))
         if kwargs:
             raise ValueError(f"unknown keyword arguments: {sorted(kwargs)}")
 
