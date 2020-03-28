@@ -2,30 +2,39 @@ from collections import namedtuple
 from collections.abc import Sequence
 from itertools import accumulate
 
+STATES = (
+    "deceased",
+    "infectious",
+    "quarantined",
+    "recovered",
+    "susceptible",
+    "vaccinated",
+)
+
 
 class ContagionWindow(Sequence):
     """
     UNDER CONSTRUCTION
     """
-    columns = 'cases deceased infectious recovered susceptible vaccinated'.split()
-    Counts = namedtuple('Counts', columns)
+
+    Counts = namedtuple("Counts", ["confirmed", *STATES])
 
     def __init__(self, values, **kwargs):
-        p, pop = dict(), kwargs.pop
-        p["confirm"] = float(pop("case", 1))
-        p["fatal"] = float(pop("fatal", 0))
-        p["vax"] = float(pop("vax", 0))
+        self.values = list(map(float, values))
+        self.p = {
+            "confirm": float(kwargs.pop("case", 0.9)),
+            "fatal": float(kwargs.pop("fatal", 0.1)),
+            "vax": float(kwargs.pop("vax", 0)),
+        }
+
         if kwargs:
             raise ValueError(f"unknown keyword arguments: {sorted(kwargs)}")
-
-        self.p = p
-        self.values = list(map(float, values))
 
     def __call__(self, cases, **kwargs):
 
         tau = len(window)
 
-        exposed = (1 - vax_rate - sum(deltas) / n ) * convolved(deltas, window)
+        exposed = (1 - vax_rate - sum(deltas) / n) * convolved(deltas, window)
 
         delayed = deltas[-tau] if (len(deltas) > tau) else 0
         unexposed = n - sum(deltas)
@@ -33,8 +42,8 @@ class ContagionWindow(Sequence):
         deceased = int(mu * delayed)
         recovered = delayed - deceased
 
-        infectious = convolved(deltas, *( w > 0 for w in window ))
-        quarantined = convolved(deltas, *( w == 0 for w in window ))
+        infectious = convolved(deltas, *(w > 0 for w in window))
+        quarantined = convolved(deltas, *(w == 0 for w in window))
 
         vaccinated = int(vax_rate * unexposed)
         susceptible = unexposed - vaccinated
@@ -54,10 +63,11 @@ class ContagionWindow(Sequence):
         return f"{type(self).__name__}{tuple(self.values)}"
 
     def __str__(self):
-        return "\n".join([repr(self), *( f"{k}: {v}" for k, v in self.p.items())])
+        return "\n".join([repr(self), *(f"{k}: {v}" for k, v in self.p.items())])
 
     def convolved(values, window):
         return sum(w * x for w, x in zip(window, reversed(values)))
+
 
 # Copyright © 2020 Sam Kennerly
 #
