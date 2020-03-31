@@ -1,5 +1,4 @@
 from collections import namedtuple
-from collections.abc import Sequence
 from itertools import accumulate
 
 STATES = (
@@ -11,33 +10,43 @@ STATES = (
     "vaccinated",
 )
 
+def convolved(values, window):
+    """ int or float: Convolution of two sequences. """
+    return sum(w * x for w, x in zip(window, reversed(values)))
 
-class ContagionWindow(Sequence):
+class Contagion:
     """
     UNDER CONSTRUCTION
     """
+    States = namedtuple("States", STATES)
 
-    Counts = namedtuple("Counts", ["confirmed", *STATES])
-
-    def __init__(self, values, **kwargs):
-        self.values = list(map(float, values))
-        self.p = {
-            "confirm": float(kwargs.pop("case", 0.9)),
-            "fatal": float(kwargs.pop("fatal", 0.1)),
-            "vax": float(kwargs.pop("vax", 0)),
+    def __init__(self, window, **kwargs):
+        window = tuple(map(float, window))
+        params = {
+            "dprob": float(kwargs.pop("dprob", 0.1)),
+            "iprob": float(kwargs.pop("iprob", 1.0)),
+            "qprob": float(kwargs.pop("qprob", 0.5)),
+            "vprob": float(kwargs.pop("vprob", 0.0)),
+            "dtime": int(kwargs.pop("dtime", len(window))),
+            "itime": int(kwargs.pop("itime", 1)),
+            "qtime": int(kwargs.pop("qtime", len(window))),
+            "vtime": int(kwargs.pop("vtime", 0)),
         }
-
         if kwargs:
             raise ValueError(f"unknown keyword arguments: {sorted(kwargs)}")
 
-    def __call__(self, cases, **kwargs):
+        self.params = params
+        self.window = window
 
-        tau = len(window)
+    def __call__(self, exposures, **kwargs):
+        params = {**self.params, **kwargs}
+        window = self.window
 
-        exposed = (1 - vax_rate - sum(deltas) / n) * convolved(deltas, window)
+        wtime = len(window)
 
-        delayed = deltas[-tau] if (len(deltas) > tau) else 0
-        unexposed = n - sum(deltas)
+        exposed = (1 - vprob - sum(deltas) / n) * convolved(deltas, window)
+
+        delayed = deltas[-wtime] if (len(deltas) > tau) else 0
 
         deceased = int(mu * delayed)
         recovered = delayed - deceased
@@ -50,23 +59,14 @@ class ContagionWindow(Sequence):
 
         return deceased, recovered, infectious, quarantined, susceptible, vaccinated
 
-    def __getitem__(self, i):
-        return self.values[i]
-
-    def __iter__(self):
-        return iter(self.values)
-
-    def __len__(self):
-        return len(self.values)
-
     def __repr__(self):
-        return f"{type(self).__name__}{tuple(self.values)}"
+        name = type(self).__name__
+        argstr = ", ".join(map(str, self.window))
+        kwargstr = ", ".join( f"{k}={v}" for k, v in self.params.items() )
 
-    def __str__(self):
-        return "\n".join([repr(self), *(f"{k}: {v}" for k, v in self.p.items())])
+        return f"{name}({argstr}, {kwargstr})"
 
-    def convolved(values, window):
-        return sum(w * x for w, x in zip(window, reversed(values)))
+
 
 
 # Copyright © 2020 Sam Kennerly
