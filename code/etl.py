@@ -26,5 +26,5 @@ def rivm(path="rivm/report.csv", **kwargs):
     return (
         read_csv(DATADIR / path, **kwargs)
         .rename_axis(None).sort_index(axis=1)
-        .resample('D').sum().astype(int)
+        .resample('D').sum().astype(int).cumsum()
     )
