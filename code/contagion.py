@@ -1,4 +1,5 @@
 from collections import deque, namedtuple
+from itertools import islice, repeat
 
 STATES = (
     "deceased",
@@ -9,64 +10,79 @@ STATES = (
     "susceptible",
     "vaccinated",
 )
-
+Counts = namedtuple("Counts", STATES)
 
 def convolution(values, window):
     """ int or float: Convolution of two sequences. """
     return sum(w * x for w, x in zip(window, reversed(values)))
 
-
 class Contagion:
     """
     UNDER CONSTRUCTION
     """
-    Counts = namedtuple("Counts", STATES)
 
-    def __init__(self, window=None, **kwargs):
-        window = tuple(map(float, window))
-        params = {
-            "beta": float(kwargs.pop("beta", 1.0)),
-            "dprob": float(kwargs.pop("dprob", 0.1)),
-            "dtime": int(kwargs.pop("dtime", len(window))),
-            "qprob": float(kwargs.pop("qprob", 0.5)),
-            "qtime": int(kwargs.pop("qtime", len(window))),
-            "total": int(kwargs.pop("total", 100)),
-            "vprob": float(kwargs.pop("vprob", 0.0)),
-        }
-        if kwargs:
-            raise ValueError(f"unknown keyword arguments: {sorted(kwargs)}")
+    def __init__(self, window, beta=1, fatal=0.5, ilag=0, qlag=1, size=100, vaxrate=0):
+        self.beta = float(beta)
+        self.fatal = float(fatal)
+        self.ilag = int(ilag)
+        self.qlag = int(qlag)
+        self.size = int(size)
+        self.window = list(window)
+        self.vaxrate = float(vaxrate)
 
-        self.params = params
-        self.window = window
-
-    def __call__(self, deltas, **kwargs):
-        params = {**self.params, **kwargs}
+    def __call__(self, cases, steps=1, **kwargs):
+        beta = kwargs.pop("beta", self.beta)
+        fatal = kwargs.pop("fatal", self.fatal)
+        ilag = kwargs.pop("ilag", self.ilag)
+        qlag = kwargs.pop("qlag", self.qlag)
+        size = kwargs.pop("size", self.size)
         window = self.window
+        vaxrate = kwargs.pop("vaxrate", self.vaxrate)
+        if kwargs:
+            raise KeyError(f"unknown keyword arguments: {sorted(kwargs)}")
 
-        wtime = len(window)
+        # Count new cases for each day in window. Pad with zeros if needed.
+        rlag = ilag + len(window)
+        deltas = (y - x for x, y in zip(cases, cases[1:]))
+        deltas = deque(deltas, maxlen=rlag)
+        deltas.extendleft(repeat(0, rlag - len(deltas)))
+        if any(x < 0 for x in deltas):
+            raise ValueError("cases must be a non-decreasing sequence")
 
+        # Initialize counters
+        closed = cases[-1] - sum(deltas)
+        uninfected = size - cases[-1]
+        vaccinated = vaxrate * uninfected
+        susceptible = uninfected - vaccinated
 
-        exposed = s * sum(w * x for w, x in zip(reversed(window), values))
+        for _ in range(steps):
 
-        delayed = deltas[-wtime] if (len(deltas) > tau) else 0
+            delta = tuple(deltas)[ilag : qlag]
+            delta = beta * sum(w * x for w, x in zip(reversed(window), delta))
+            delta *= susceptible / size
+            closed += deltas.popleft()
+            deltas.append(delta)
 
-        deceased = int(mu * delayed)
-        recovered = delayed - deceased
+            deceased = fatal * closed
+            exposed = sum(islice(deltas, 0, ilag))
+            infectious = sum(islice(deltas, ilag, min(qlag, rlag)))
+            quarantined = sum(islice(deltas, qlag, rlag))
+            recovered = closed - deceased
+            susceptible -= delta
 
-        infectious = convolution(deltas, *(w > 0 for w in window))
-        quarantined = convolution(deltas, *(w == 0 for w in window))
+            if not susceptible > 0:
+                break
 
-        vaccinated = int(vax_rate * unexposed)
-        susceptible = unexposed - vaccinated
+            yield Counts(
+                deceased,
+                exposed,
+                infectious,
+                quarantined,
+                recovered,
+                susceptible,
+                vaccinated,
+            )
 
-        return deceased, recovered, infectious, quarantined, susceptible, vaccinated
-
-    def __repr__(self):
-        name = type(self).__name__
-        argstr = ", ".join(map(str, self.window))
-        kwargstr = ", ".join( f"{k}={v}" for k, v in self.params.items() )
-
-        return f"{name}({argstr}, {kwargstr})"
 
 
 
