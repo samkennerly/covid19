@@ -1,5 +1,5 @@
 from collections import deque, namedtuple
-from itertools import islice, repeat
+from itertools import chain, islice, repeat, takewhile
 
 STATES = (
     "deceased",
@@ -12,66 +12,73 @@ STATES = (
 )
 Counts = namedtuple("Counts", STATES)
 
-def convolution(values, window):
-    """ int or float: Convolution of two sequences. """
-    return sum(w * x for w, x in zip(window, reversed(values)))
 
-class Contagion:
+class Window:
     """
     UNDER CONSTRUCTION
     """
 
-    def __init__(self, window, beta=1, fatal=0.5, ilag=0, qlag=1, size=100, vaxrate=0):
-        self.beta = float(beta)
+    def __init__(self, *args, delay=None, escape=0, fatal=0, size=1, vax=0):
+        self.betas = list(map(float, args))
+        self.delay = len(args) if delay is None else int(delay)
+        self.escape = float(escape)
         self.fatal = float(fatal)
-        self.ilag = int(ilag)
-        self.qlag = int(qlag)
-        self.size = int(size)
-        self.window = list(window)
-        self.vaxrate = float(vaxrate)
+        self.size = float(size)
+        self.vax = float(vax)
 
-    def __call__(self, cases, steps=1, **kwargs):
-        beta = kwargs.pop("beta", self.beta)
-        fatal = kwargs.pop("fatal", self.fatal)
-        ilag = kwargs.pop("ilag", self.ilag)
-        qlag = kwargs.pop("qlag", self.qlag)
-        size = kwargs.pop("size", self.size)
-        window = self.window
-        vaxrate = kwargs.pop("vaxrate", self.vaxrate)
-        if kwargs:
-            raise KeyError(f"unknown keyword arguments: {sorted(kwargs)}")
+    def __call__(self, *args, **kwargs):
+        return type(self)(*(args or self.betas), **{**self.params, **kwargs})
 
-        # Count new cases for each day in window. Pad with zeros if needed.
-        rlag = ilag + len(window)
-        deltas = (y - x for x, y in zip(cases, cases[1:]))
-        deltas = deque(deltas, maxlen=rlag)
-        deltas.extendleft(repeat(0, rlag - len(deltas)))
-        if any(x < 0 for x in deltas):
-            raise ValueError("cases must be a non-decreasing sequence")
+    def __iter__(self):
+        betas, delay, escape = self.betas, self.delay, self.escape
 
-        # Initialize counters
+        return chain(betas[:delay], (escape * x for x in betas[delay:]))
+
+    def __len__(self):
+        return len(self.betas)
+
+    def __mul__(self, scalar):
+        return self(*(scalar * x for x in self.betas))
+
+    def __repr__(self):
+        return f"{type(self).__name__}{tuple(self)}"
+
+    def __reversed__(self):
+        return reversed(tuple(self))
+
+    def __truediv__(self, scalar):
+        return self * (1.0 / scalar)
+
+    def forecast(self, cases, limit=1):
+        """ Iterable[Counts]: Predicted counts on each future timestep. """
+        escape = self.escape
+        fatal = self.fatal
+        gap = self.gap
+        latency = self.latency
+        size = self.size
+        vax = self.vax
+
+        cases = deque(cases, maxlen=len(self))
+        deltas = deque(y - x for x, y in zip((0, *cases), cases))
+        deltas.extend(repeat(0, len(self) - len(deltas)))
         closed = cases[-1] - sum(deltas)
-        uninfected = size - cases[-1]
-        vaccinated = vaxrate * uninfected
-        susceptible = uninfected - vaccinated
+        vaccinated = vax * size
+        susceptible = size - cases[-1] - vaccinated
 
-        for _ in range(steps):
+        for _ in range(limit):
 
-            delta = tuple(deltas)[ilag : qlag]
-            delta = beta * sum(w * x for w, x in zip(reversed(window), delta))
-            delta *= susceptible / size
-            closed += deltas.popleft()
-            deltas.append(delta)
+            delta = sum(w * x for w, x in zip(self, deltas))
+            delta = min(susceptible, delta * susceptible / size)
+            closed += deltas.pop()
+            deltas.appendleft(delta)
 
             deceased = fatal * closed
-            exposed = sum(islice(deltas, 0, ilag))
-            infectious = sum(islice(deltas, ilag, min(qlag, rlag)))
-            quarantined = sum(islice(deltas, qlag, rlag))
             recovered = closed - deceased
             susceptible -= delta
 
-            if not susceptible > 0:
-                break
+            quarantined = sum(islice(deltas, latency + gap, None)) * (1 - escape)
+            infectious = sum(islice(deltas, latency, None)) - quarantined
+            exposed = sum(islice(deltas, 0, latency))
 
             yield Counts(
                 deceased,
@@ -81,10 +88,29 @@ class Contagion:
                 recovered,
                 susceptible,
                 vaccinated,
-            )
+                )
 
+    @property
+    def gap(self):
+        """ int: Time between host becoming infectious and quarantine start. """
+        return max(0, self.delay - self.latency)
 
+    @property
+    def latency(self):
+        """ int: Timestep after exposure when host becomes infectious. """
+        return sum(1 for _ in takewhile(lambda x: not x, self.betas))
 
+    @property
+    def params(self):
+        """ dict: All keyword arguments needed to create a copy. """
+        keys = "delay escape fatal size vax".split()
+
+        return {k: getattr(self, k) for k in keys}
+
+    @property
+    def ratio(self):
+        """ float: Reproduction ratio. """
+        return sum(self)
 
 
 # Copyright © 2020 Sam Kennerly
